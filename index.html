@@ -7,67 +7,75 @@
   <title>2048 Game</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #faf8ef;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #faf8ef;
+      justify-content: flex-start;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
     }
     .score-board {
+      margin-top: 20px;
       display: flex;
       justify-content: space-around;
       width: 300px;
-      margin-bottom: 10px;
     }
     .score-box {
       background: #bbada0;
-      padding: 10px;
-      border-radius: 5px;
-      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      color: #fff;
     }
     #game-board {
+      margin-top: 20px;
       background: #bbada0;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 15px;
       display: grid;
-      grid-template-columns: repeat(4, 70px);
+      grid-template-columns: repeat(4, 80px);
       grid-gap: 10px;
+      touch-action: none; /* 防止手机端默认滑动 */
     }
     .tile {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       background: #cdc1b4;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 24px;
       font-weight: bold;
-      border-radius: 5px;
+      border-radius: 10px;
+      transition: transform 0.2s ease;
       color: #776e65;
     }
     .tile-0 { background: #cdc1b4; }
     .tile-2 { background: #eee4da; }
     .tile-4 { background: #ede0c8; }
-    .tile-8 { background: #f2b179; color: white; }
-    .tile-16 { background: #f59563; color: white; }
-    .tile-32 { background: #f67c5f; color: white; }
-    .tile-64 { background: #f65e3b; color: white; }
-    .tile-128 { background: #edcf72; color: white; }
-    .tile-256 { background: #edcc61; color: white; }
-    .tile-512 { background: #edc850; color: white; }
-    .tile-1024 { background: #edc53f; color: white; }
-    .tile-2048 { background: #edc22e; color: white; }
+    .tile-8 { background: #f2b179; color: #fff; }
+    .tile-16 { background: #f59563; color: #fff; }
+    .tile-32 { background: #f67c5f; color: #fff; }
+    .tile-64 { background: #f65e3b; color: #fff; }
+    .tile-128 { background: #edcf72; color: #fff; }
+    .tile-256 { background: #edcc61; color: #fff; }
+    .tile-512 { background: #edc850; color: #fff; }
+    .tile-1024 { background: #edc53f; color: #fff; }
+    .tile-2048 { background: #edc22e; color: #fff; }
     button {
-      margin-top: 10px;
+      margin-top: 20px;
       padding: 10px 20px;
       font-size: 16px;
       border: none;
       border-radius: 5px;
       background: #8f7a66;
       color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #a08c77;
     }
   </style>
 </head>
@@ -96,7 +104,8 @@ function setup() {
 }
 
 function render() {
-  document.getElementById('game-board').innerHTML = '';
+  const gameBoard = document.getElementById('game-board');
+  gameBoard.innerHTML = '';
   document.getElementById('score').textContent = score;
   document.getElementById('best').textContent = best;
   for (let i = 0; i < SIZE; i++) {
@@ -104,7 +113,8 @@ function render() {
       const tile = document.createElement('div');
       tile.className = `tile tile-${board[i][j]}`;
       tile.textContent = board[i][j] ? board[i][j] : '';
-      document.getElementById('game-board').appendChild(tile);
+      tile.style.transform = 'scale(1)';
+      gameBoard.appendChild(tile);
     }
   }
 }
@@ -149,8 +159,16 @@ function move(dir) {
       best = score;
       localStorage.setItem('best', best);
     }
-    render();
+    animateMove();
+    setTimeout(render, 150);
   }
+}
+
+function animateMove() {
+  document.querySelectorAll('.tile').forEach(tile => {
+    tile.style.transform = 'scale(1.1)';
+    setTimeout(() => tile.style.transform = 'scale(1)', 100);
+  });
 }
 
 function slide(row) {
@@ -217,7 +235,12 @@ let startX, startY;
 document.addEventListener('touchstart', e => {
   startX = e.touches[0].clientX;
   startY = e.touches[0].clientY;
-});
+}, {passive: false});
+
+document.addEventListener('touchmove', e => {
+  e.preventDefault(); 
+}, {passive: false});
+
 document.addEventListener('touchend', e => {
   let dx = e.changedTouches[0].clientX - startX;
   let dy = e.changedTouches[0].clientY - startY;
